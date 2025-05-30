@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { App } from '@/types/app';
 import { Button } from '@/components/ui/button';
-import { X, Minus, Square } from 'lucide-react';
+import { X, Minus, Square, RotateCcw } from 'lucide-react';
 
 interface AppWindowProps {
   app: App;
@@ -21,17 +21,23 @@ const AppWindow: React.FC<AppWindowProps> = ({
   zIndex, 
   isMinimized 
 }) => {
+  const [refreshKey, setRefreshKey] = useState(0);
+
   if (isMinimized) return null;
+
+  const handleRefresh = () => {
+    setRefreshKey(prev => prev + 1);
+  };
 
   return (
     <div 
-      className="fixed inset-4 bg-white rounded-lg shadow-2xl border border-gray-200 flex flex-col animate-scale-in"
+      className="fixed inset-0 top-0 bg-white flex flex-col animate-scale-in"
       style={{ zIndex }}
       onClick={() => onFocus(app.id)}
     >
       {/* Title Bar */}
       <div 
-        className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg border-b border-gray-200"
+        className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 shrink-0"
       >
         <div className="flex items-center space-x-3">
           <div 
@@ -57,6 +63,17 @@ const AppWindow: React.FC<AppWindowProps> = ({
           <Button
             variant="ghost"
             size="sm"
+            className="h-8 w-8 p-0 hover:bg-blue-100"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleRefresh();
+            }}
+          >
+            <RotateCcw className="h-4 w-4 text-blue-600" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
             className="h-8 w-8 p-0 hover:bg-green-100"
           >
             <Square className="h-3 w-3 text-green-600" />
@@ -76,8 +93,9 @@ const AppWindow: React.FC<AppWindowProps> = ({
       </div>
       
       {/* Content Area */}
-      <div className="flex-1 bg-white rounded-b-lg overflow-hidden">
+      <div className="flex-1 bg-white overflow-hidden">
         <iframe
+          key={refreshKey}
           src={app.url}
           className="w-full h-full border-0"
           title={app.name}

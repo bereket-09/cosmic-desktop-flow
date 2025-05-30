@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { App, Group } from '@/types/app';
 import Dashboard from '@/components/Dashboard';
@@ -171,18 +170,13 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Top Bar with User Menu */}
-      <div className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-b border-gray-200 px-4 py-2 z-40">
-        <div className="flex justify-between items-center max-w-7xl mx-auto">
-          <h1 className="text-lg font-semibold text-gray-800">Workspace</h1>
-          <UserMenu onOpenSettings={() => setIsSettingsOpen(true)} />
-        </div>
+      {/* User Menu in top-right corner */}
+      <div className="fixed top-4 right-4 z-40">
+        <UserMenu onOpenSettings={() => setIsSettingsOpen(true)} />
       </div>
 
-      {/* Dashboard with top padding to account for top bar */}
-      <div className="pt-14">
-        <Dashboard apps={apps} onLaunchApp={handleLaunchApp} />
-      </div>
+      {/* Dashboard with no top padding */}
+      <Dashboard apps={apps} onLaunchApp={handleLaunchApp} />
       
       {openApps.map((app) => (
         <AppWindow
@@ -201,6 +195,7 @@ const Index = () => {
         activeAppId={activeAppId}
         onAppClick={handleFocusApp}
         onOpenSettings={() => setIsSettingsOpen(true)}
+        onCloseApp={handleCloseApp}
         minimizedApps={minimizedApps}
       />
       
