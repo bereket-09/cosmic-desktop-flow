@@ -5,6 +5,7 @@ import Dashboard from '@/components/Dashboard';
 import AppWindow from '@/components/AppWindow';
 import Taskbar from '@/components/Taskbar';
 import Settings from '@/components/Settings';
+import UserMenu from '@/components/UserMenu';
 
 const Index = () => {
   const [apps, setApps] = useState<App[]>([
@@ -128,12 +129,36 @@ const Index = () => {
     setApps(prev => [...prev, newApp]);
   };
 
+  const handleEditApp = (appId: string, appData: Omit<App, 'id' | 'isOpen' | 'zIndex'>) => {
+    setApps(prev => prev.map(app => 
+      app.id === appId 
+        ? { ...app, ...appData }
+        : app
+    ));
+  };
+
+  const handleDeleteApp = (appId: string) => {
+    setApps(prev => prev.filter(app => app.id !== appId));
+    // Close the app if it's open
+    if (openApps.find(app => app.id === appId)) {
+      handleCloseApp(appId);
+    }
+  };
+
   const handleAddGroup = (groupData: Omit<Group, 'id'>) => {
     const newGroup: Group = {
       ...groupData,
       id: Date.now().toString()
     };
     setGroups(prev => [...prev, newGroup]);
+  };
+
+  const handleEditGroup = (groupId: string, groupData: Omit<Group, 'id'>) => {
+    setGroups(prev => prev.map(group => 
+      group.id === groupId 
+        ? { ...group, ...groupData }
+        : group
+    ));
   };
 
   const handleDeleteGroup = (groupId: string) => {
@@ -146,7 +171,18 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Dashboard apps={apps} onLaunchApp={handleLaunchApp} />
+      {/* Top Bar with User Menu */}
+      <div className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-b border-gray-200 px-4 py-2 z-40">
+        <div className="flex justify-between items-center max-w-7xl mx-auto">
+          <h1 className="text-lg font-semibold text-gray-800">Workspace</h1>
+          <UserMenu onOpenSettings={() => setIsSettingsOpen(true)} />
+        </div>
+      </div>
+
+      {/* Dashboard with top padding to account for top bar */}
+      <div className="pt-14">
+        <Dashboard apps={apps} onLaunchApp={handleLaunchApp} />
+      </div>
       
       {openApps.map((app) => (
         <AppWindow
@@ -174,7 +210,10 @@ const Index = () => {
         apps={apps}
         groups={groups}
         onAddApp={handleAddApp}
+        onEditApp={handleEditApp}
+        onDeleteApp={handleDeleteApp}
         onAddGroup={handleAddGroup}
+        onEditGroup={handleEditGroup}
         onDeleteGroup={handleDeleteGroup}
       />
     </div>

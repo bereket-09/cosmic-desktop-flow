@@ -15,6 +15,9 @@ interface SettingsProps {
   onAddApp: (app: Omit<App, 'id' | 'isOpen' | 'zIndex'>) => void;
   onAddGroup: (group: Omit<Group, 'id'>) => void;
   onDeleteGroup: (groupId: string) => void;
+  onEditApp: (appId: string, app: Omit<App, 'id' | 'isOpen' | 'zIndex'>) => void;
+  onEditGroup: (groupId: string, group: Omit<Group, 'id'>) => void;
+  onDeleteApp: (appId: string) => void;
 }
 
 const Settings: React.FC<SettingsProps> = ({ 
@@ -24,11 +27,16 @@ const Settings: React.FC<SettingsProps> = ({
   groups, 
   onAddApp, 
   onAddGroup, 
-  onDeleteGroup 
+  onDeleteGroup,
+  onEditApp,
+  onEditGroup,
+  onDeleteApp
 }) => {
   const [activeTab, setActiveTab] = useState<'apps' | 'groups'>('apps');
   const [showAddApp, setShowAddApp] = useState(false);
   const [showAddGroup, setShowAddGroup] = useState(false);
+  const [editingApp, setEditingApp] = useState<App | null>(null);
+  const [editingGroup, setEditingGroup] = useState<Group | null>(null);
   
   const [appFormData, setAppFormData] = useState({
     name: '',
@@ -46,21 +54,60 @@ const Settings: React.FC<SettingsProps> = ({
   const iconOptions = ['🚀', '📊', '💻', '🌐', '📱', '⚙️', '📈', '🔧', '📋', '🏠', '📅', '💼'];
   const colorOptions = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
 
-  const handleAddApp = (e: React.FormEvent) => {
+  const resetAppForm = () => {
+    setAppFormData({ name: '', url: '', icon: '🚀', color: '#3b82f6', groups: [] });
+    setEditingApp(null);
+    setShowAddApp(false);
+  };
+
+  const resetGroupForm = () => {
+    setGroupFormData({ name: '', color: '#3b82f6' });
+    setEditingGroup(null);
+    setShowAddGroup(false);
+  };
+
+  const handleEditApp = (app: App) => {
+    setAppFormData({
+      name: app.name,
+      url: app.url,
+      icon: app.icon,
+      color: app.color,
+      groups: app.groups
+    });
+    setEditingApp(app);
+    setShowAddApp(true);
+  };
+
+  const handleEditGroup = (group: Group) => {
+    setGroupFormData({
+      name: group.name,
+      color: group.color
+    });
+    setEditingGroup(group);
+    setShowAddGroup(true);
+  };
+
+  const handleAppSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (appFormData.name && appFormData.url) {
-      onAddApp(appFormData);
-      setAppFormData({ name: '', url: '', icon: '🚀', color: '#3b82f6', groups: [] });
-      setShowAddApp(false);
+      if (editingApp) {
+        onEditApp(editingApp.id, appFormData);
+      } else {
+        onAddApp(appFormData);
+      }
+      resetAppForm();
     }
   };
 
-  const handleAddGroup = (e: React.FormEvent) => {
+  const handleGroupSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (groupFormData.name) {
-      onAddGroup(groupFormData);
-      setGroupFormData({ name: '', color: '#3b82f6' });
-      setShowAddGroup(false);
+      if (editingGroup) {
+        onEditGroup(editingGroup.id, groupFormData);
+      } else {
+        onAddGroup(groupFormData);
+      }
+      resetGroupForm();
     }
   };
 
@@ -100,7 +147,7 @@ const Settings: React.FC<SettingsProps> = ({
               </div>
               
               {showAddApp && (
-                <form onSubmit={handleAddApp} className="space-y-4 border rounded-lg p-4 bg-gray-50">
+                <form onSubmit={handleAppSubmit} className="space-y-4 border rounded-lg p-4 bg-gray-50">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="app-name">App Name</Label>
@@ -193,8 +240,10 @@ const Settings: React.FC<SettingsProps> = ({
                   </div>
                   
                   <div className="flex space-x-2">
-                    <Button type="submit" size="sm">Add App</Button>
-                    <Button type="button" variant="outline" size="sm" onClick={() => setShowAddApp(false)}>
+                    <Button type="submit" size="sm">
+                      {editingApp ? 'Update App' : 'Add App'}
+                    </Button>
+                    <Button type="button" variant="outline" size="sm" onClick={resetAppForm}>
                       Cancel
                     </Button>
                   </div>
@@ -216,6 +265,24 @@ const Settings: React.FC<SettingsProps> = ({
                         <div className="text-xs text-gray-500">{app.url}</div>
                       </div>
                     </div>
+                    <div className="flex space-x-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditApp(app)}
+                        className="text-blue-600 hover:text-blue-700"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onDeleteApp(app.id)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -233,7 +300,7 @@ const Settings: React.FC<SettingsProps> = ({
               </div>
               
               {showAddGroup && (
-                <form onSubmit={handleAddGroup} className="space-y-4 border rounded-lg p-4 bg-gray-50">
+                <form onSubmit={handleGroupSubmit} className="space-y-4 border rounded-lg p-4 bg-gray-50">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="group-name">Group Name</Label>
@@ -266,8 +333,10 @@ const Settings: React.FC<SettingsProps> = ({
                   </div>
                   
                   <div className="flex space-x-2">
-                    <Button type="submit" size="sm">Add Group</Button>
-                    <Button type="button" variant="outline" size="sm" onClick={() => setShowAddGroup(false)}>
+                    <Button type="submit" size="sm">
+                      {editingGroup ? 'Update Group' : 'Add Group'}
+                    </Button>
+                    <Button type="button" variant="outline" size="sm" onClick={resetGroupForm}>
                       Cancel
                     </Button>
                   </div>
@@ -284,14 +353,24 @@ const Settings: React.FC<SettingsProps> = ({
                       />
                       <span className="font-medium">{group.name}</span>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onDeleteGroup(group.id)}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    <div className="flex space-x-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditGroup(group)}
+                        className="text-blue-600 hover:text-blue-700"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onDeleteGroup(group.id)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
