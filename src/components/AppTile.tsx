@@ -10,31 +10,23 @@ interface AppTileProps {
 const AppTile: React.FC<AppTileProps> = ({ app, onLaunch }) => {
   return (
     <div 
-      className="group relative bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:scale-105 hover:-translate-y-1 p-6 border border-white/50 hover:border-white/80"
+      className="group relative bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 p-6 border border-gray-100"
       onClick={() => onLaunch(app)}
     >
-      <div className="flex flex-col items-center space-y-4">
-        <div className="relative">
-          <div 
-            className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-xl group-hover:shadow-2xl transition-all duration-300 group-hover:scale-110"
-            style={{ backgroundColor: app.color }}
-          >
-            {app.icon}
-          </div>
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      <div className="flex flex-col items-center space-y-3">
+        <div 
+          className="w-16 h-16 rounded-xl flex items-center justify-center text-white text-2xl font-bold shadow-lg"
+          style={{ backgroundColor: app.color }}
+        >
+          {app.icon}
         </div>
         <div className="text-center">
-          <h3 className="font-semibold text-gray-800 text-sm group-hover:text-indigo-600 transition-colors duration-300">
+          <h3 className="font-semibold text-gray-800 text-sm group-hover:text-blue-600 transition-colors">
             {app.name}
           </h3>
         </div>
       </div>
-      
-      {/* Animated background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-blue-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
-      
-      {/* Subtle glow effect */}
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
     </div>
   );
 };

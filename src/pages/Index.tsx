@@ -168,13 +168,6 @@ const Index = () => {
     })));
   };
 
-  const handleShowDashboard = () => {
-    // Close all apps and show dashboard
-    setApps(prev => prev.map(app => ({ ...app, isOpen: false })));
-    setActiveAppId(null);
-    setMinimizedApps([]);
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* User Menu in top-right corner */}
@@ -204,7 +197,6 @@ const Index = () => {
         onOpenSettings={() => setIsSettingsOpen(true)}
         onCloseApp={handleCloseApp}
         minimizedApps={minimizedApps}
-        onShowDashboard={handleShowDashboard}
       />
       
       <Settings
