@@ -1,10 +1,10 @@
 
 import React, { useState } from 'react';
-import { App } from '@/types/app';
+import { App, Group } from '@/types/app';
 import Dashboard from '@/components/Dashboard';
 import AppWindow from '@/components/AppWindow';
 import Taskbar from '@/components/Taskbar';
-import AppConfigModal from '@/components/AppConfigModal';
+import Settings from '@/components/Settings';
 
 const Index = () => {
   const [apps, setApps] = useState<App[]>([
@@ -15,7 +15,8 @@ const Index = () => {
       icon: '🔧',
       color: '#3b82f6',
       isOpen: false,
-      zIndex: 1
+      zIndex: 1,
+      groups: ['work']
     },
     {
       id: '2',
@@ -24,7 +25,8 @@ const Index = () => {
       icon: '🌐',
       color: '#10b981',
       isOpen: false,
-      zIndex: 1
+      zIndex: 1,
+      groups: ['work', 'productivity']
     },
     {
       id: '3',
@@ -33,7 +35,8 @@ const Index = () => {
       icon: '📊',
       color: '#f59e0b',
       isOpen: false,
-      zIndex: 1
+      zIndex: 1,
+      groups: ['work']
     },
     {
       id: '4',
@@ -42,13 +45,21 @@ const Index = () => {
       icon: '📈',
       color: '#8b5cf6',
       isOpen: false,
-      zIndex: 1
+      zIndex: 1,
+      groups: ['development']
     }
+  ]);
+
+  const [groups, setGroups] = useState<Group[]>([
+    { id: 'work', name: 'Work', color: '#3b82f6' },
+    { id: 'productivity', name: 'Productivity', color: '#10b981' },
+    { id: 'development', name: 'Development', color: '#8b5cf6' }
   ]);
   
   const [activeAppId, setActiveAppId] = useState<string | null>(null);
-  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [maxZIndex, setMaxZIndex] = useState(1);
+  const [minimizedApps, setMinimizedApps] = useState<string[]>([]);
 
   const openApps = apps.filter(app => app.isOpen);
 
@@ -62,6 +73,7 @@ const Index = () => {
         : a
     ));
     setActiveAppId(app.id);
+    setMinimizedApps(prev => prev.filter(id => id !== app.id));
   };
 
   const handleCloseApp = (appId: string) => {
@@ -71,13 +83,21 @@ const Index = () => {
         : app
     ));
     
+    setMinimizedApps(prev => prev.filter(id => id !== appId));
+    
     if (activeAppId === appId) {
-      const remainingOpenApps = apps.filter(app => app.isOpen && app.id !== appId);
+      const remainingOpenApps = apps.filter(app => app.isOpen && app.id !== appId && !minimizedApps.includes(app.id));
       setActiveAppId(remainingOpenApps.length > 0 ? remainingOpenApps[remainingOpenApps.length - 1].id : null);
     }
   };
 
   const handleFocusApp = (appId: string) => {
+    const isMinimized = minimizedApps.includes(appId);
+    
+    if (isMinimized) {
+      setMinimizedApps(prev => prev.filter(id => id !== appId));
+    }
+    
     const newZIndex = maxZIndex + 1;
     setMaxZIndex(newZIndex);
     
@@ -87,6 +107,15 @@ const Index = () => {
         : app
     ));
     setActiveAppId(appId);
+  };
+
+  const handleMinimizeApp = (appId: string) => {
+    setMinimizedApps(prev => [...prev, appId]);
+    
+    if (activeAppId === appId) {
+      const remainingOpenApps = apps.filter(app => app.isOpen && app.id !== appId && !minimizedApps.includes(app.id));
+      setActiveAppId(remainingOpenApps.length > 0 ? remainingOpenApps[remainingOpenApps.length - 1].id : null);
+    }
   };
 
   const handleAddApp = (appData: Omit<App, 'id' | 'isOpen' | 'zIndex'>) => {
@@ -99,6 +128,22 @@ const Index = () => {
     setApps(prev => [...prev, newApp]);
   };
 
+  const handleAddGroup = (groupData: Omit<Group, 'id'>) => {
+    const newGroup: Group = {
+      ...groupData,
+      id: Date.now().toString()
+    };
+    setGroups(prev => [...prev, newGroup]);
+  };
+
+  const handleDeleteGroup = (groupId: string) => {
+    setGroups(prev => prev.filter(group => group.id !== groupId));
+    setApps(prev => prev.map(app => ({
+      ...app,
+      groups: app.groups.filter(g => g !== groupId)
+    })));
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Dashboard apps={apps} onLaunchApp={handleLaunchApp} />
@@ -109,7 +154,9 @@ const Index = () => {
           app={app}
           onClose={handleCloseApp}
           onFocus={handleFocusApp}
+          onMinimize={handleMinimizeApp}
           zIndex={app.zIndex}
+          isMinimized={minimizedApps.includes(app.id)}
         />
       ))}
       
@@ -117,13 +164,18 @@ const Index = () => {
         openApps={openApps}
         activeAppId={activeAppId}
         onAppClick={handleFocusApp}
-        onAddApp={() => setIsConfigModalOpen(true)}
+        onOpenSettings={() => setIsSettingsOpen(true)}
+        minimizedApps={minimizedApps}
       />
       
-      <AppConfigModal
-        isOpen={isConfigModalOpen}
-        onClose={() => setIsConfigModalOpen(false)}
-        onSave={handleAddApp}
+      <Settings
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        apps={apps}
+        groups={groups}
+        onAddApp={handleAddApp}
+        onAddGroup={handleAddGroup}
+        onDeleteGroup={handleDeleteGroup}
       />
     </div>
   );

@@ -7,6 +7,7 @@ export interface App {
   color: string;
   isOpen: boolean;
   zIndex: number;
+  groups: string[];
 }
 
 export interface WindowPosition {
@@ -14,4 +15,10 @@ export interface WindowPosition {
   y: number;
   width: number;
   height: number;
+}
+
+export interface Group {
+  id: string;
+  name: string;
+  color: string;
 }

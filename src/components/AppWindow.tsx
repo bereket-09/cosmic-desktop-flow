@@ -8,12 +8,19 @@ interface AppWindowProps {
   app: App;
   onClose: (appId: string) => void;
   onFocus: (appId: string) => void;
+  onMinimize: (appId: string) => void;
   zIndex: number;
+  isMinimized: boolean;
 }
 
-const AppWindow: React.FC<AppWindowProps> = ({ app, onClose, onFocus, zIndex }) => {
-  const [isMinimized, setIsMinimized] = useState(false);
-
+const AppWindow: React.FC<AppWindowProps> = ({ 
+  app, 
+  onClose, 
+  onFocus, 
+  onMinimize, 
+  zIndex, 
+  isMinimized 
+}) => {
   if (isMinimized) return null;
 
   return (
@@ -42,7 +49,7 @@ const AppWindow: React.FC<AppWindowProps> = ({ app, onClose, onFocus, zIndex }) 
             className="h-8 w-8 p-0 hover:bg-yellow-100"
             onClick={(e) => {
               e.stopPropagation();
-              setIsMinimized(true);
+              onMinimize(app.id);
             }}
           >
             <Minus className="h-4 w-4 text-yellow-600" />
