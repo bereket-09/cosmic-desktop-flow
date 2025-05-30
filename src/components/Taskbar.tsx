@@ -2,7 +2,7 @@
 import React from 'react';
 import { App } from '@/types/app';
 import { Button } from '@/components/ui/button';
-import { Settings } from 'lucide-react';
+import { Settings, Home } from 'lucide-react';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -17,6 +17,7 @@ interface TaskbarProps {
   onOpenSettings: () => void;
   onCloseApp: (appId: string) => void;
   minimizedApps: string[];
+  onShowDashboard: () => void;
 }
 
 const Taskbar: React.FC<TaskbarProps> = ({ 
@@ -25,12 +26,21 @@ const Taskbar: React.FC<TaskbarProps> = ({
   onAppClick, 
   onOpenSettings,
   onCloseApp,
-  minimizedApps 
+  minimizedApps,
+  onShowDashboard
 }) => {
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-gray-200 px-2 py-1 z-50">
-      <div className="flex items-center justify-between max-w-7xl mx-auto">
+    <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-gray-200 px-4 py-1.5 z-50">
+      <div className="flex items-center justify-between w-full">
         <div className="flex items-center space-x-1">
+          <Button
+            onClick={onShowDashboard}
+            size="sm"
+            className="bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 transition-all duration-200 h-7 w-7 p-0 rounded-lg shadow-lg"
+          >
+            <Home className="w-4 h-4" />
+          </Button>
+          
           {openApps.map((app) => {
             const isMinimized = minimizedApps.includes(app.id);
             return (
@@ -39,7 +49,7 @@ const Taskbar: React.FC<TaskbarProps> = ({
                   <Button
                     variant={activeAppId === app.id && !isMinimized ? "default" : "ghost"}
                     size="sm"
-                    className={`flex items-center space-x-1 transition-all duration-200 h-6 px-2 text-xs ${
+                    className={`flex items-center space-x-1 transition-all duration-200 h-7 px-2 text-xs ${
                       activeAppId === app.id && !isMinimized
                         ? 'bg-blue-600 text-white shadow-lg' 
                         : isMinimized
@@ -70,10 +80,9 @@ const Taskbar: React.FC<TaskbarProps> = ({
         <Button
           onClick={onOpenSettings}
           size="sm"
-          className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 transition-all duration-200 h-6 px-2 text-xs"
+          className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 h-7 w-7 p-0 rounded-lg shadow-lg"
         >
-          <Settings className="w-3 h-3 mr-1" />
-          Settings
+          <Settings className="w-4 h-4" />
         </Button>
       </div>
     </div>
